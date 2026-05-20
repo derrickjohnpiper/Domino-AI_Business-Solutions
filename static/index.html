@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domino AI – Corporate Presence & Brand Automation Suite</title>
+  <meta name="description" content="Local secure corporate profile automation suite powered by Domino AI." />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Brand tokens ─────────────────────────────── */
+    :root {
+      --primary:      #6366F1; /* Indigo */
+      --primary-glow: rgba(99, 102, 241, 0.3);
+      --dark:         #0B0F19; /* Deep space slate */
+      --dark-card:    rgba(22, 29, 48, 0.7); /* Glass slate */
+      --border:       rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text:         #F3F4F6;
+      --text-dim:     #9CA3AF;
+      --radius:       16px;
+      --danger:       #EF4444;
+      --success:      #10B981;
+      --warning:      #F59E0B;
+      --max-w:        960px;
+    }
+
+    /* ── Reset & base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--dark) 75%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background particles ── */
+    .bg-particles {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+      overflow: hidden;
+    }
+    .bg-particles span {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { opacity: 0; transform: translateY(105vh) scale(0); }
+      10%  { opacity: 0.4; }
+      90%  { opacity: 0.2; }
+      100% { opacity: 0; transform: translateY(-5vh) scale(1.5); }
+    }
+
+    /* ── Layout ───────────────────────────────────── */
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 5rem;
+    }
+
+    /* ── Top Bar / Header Action Row ─────────────── */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      background: rgba(22, 29, 48, 0.5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-bottom: 2rem;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .top-bar-left img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .top-bar-left h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .top-bar-user {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-family: 'Inter', sans-serif;
+      margin-right: 0.5rem;
+    }
+
+    .top-bar-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .top-bar-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: var(--primary);
+    }
+
+    .lock-btn {
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .lock-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--danger);
+    }
+
+    /* ── Code of Conduct Banner ────────────────── */
+    .conduct-banner {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+    }
+
+    .conduct-banner svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .conduct-content h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .conduct-content p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* ── Main Workspace Cards ───────────────────── */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .glass-card {
+      background: var(--dark-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: all 0.3s;
+    }
+
+    .glass-card h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    /* ── Form Inputs ────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 580px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .field-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .field-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+      background: rgba(11, 15, 25, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .field-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    /* ── Upload Area ────────────────────────────── */
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .file-drop:hover {
+      background: rgba(99, 102, 241, 0.05);
+      border-color: var(--primary);
+    }
+
+    .file-drop input[type="file"] {
+      display: none;
+    }
+
+    .file-drop svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .file-drop .drop-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .file-drop .drop-label span {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* ── Network & Channels Bar ────────────────── */
+    .network-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(11, 15, 25, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .proxy-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .proxy-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+    }
+    .proxy-dot.healthy { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .proxy-dot.slow { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .proxy-dot.dead { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    .proxy-dot.checking { background: #888; animation: pulse 0.8s infinite; }
+
+    @keyframes pulse {
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Channel Selector Tabs ──────────────────── */
+    .tabs-container {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fade-in 0.3s ease;
+    }
+
+    /* ── Channel Cards Grid ─────────────────────── */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .channel-card {
+      background: rgba(11, 15, 25, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 90px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .channel-card:hover {
+      border-color: var(--primary-glow);
+      background: rgba(99, 102, 241, 0.03);
+    }
+
+    .channel-card.checked {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.08);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+    }
+
+    .channel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .channel-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .channel-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.35rem;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      color: var(--text-dim);
+    }
+
+    .channel-card.checked .channel-badge {
+      background: var(--primary);
+      color: white;
+    }
+
+    .channel-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .channel-checkbox {
+      display: none;
+    }
+
+    .custom-check-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .channel-card.checked .custom-check-box {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .channel-card.checked .custom-check-box::after {
+      content: '';
+      width: 4px;
+      height: 7px;
+      border: 1.5px solid white;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translateY(-0.5px);
+      display: block;
+    }
+
+    .edit-override-btn {
+      font-size: 0.72rem;
+      color: var(--primary);
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: none; /* Shown only when card is checked */
+    }
+
+    .edit-override-btn:hover {
+      text-decoration: underline;
+    }
+
+    .channel-card.checked .edit-override-btn {
+      display: block;
+    }
+
+    /* ── Select All / Clear Row ────────────────── */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .controls-left {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .controls-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .controls-btn:hover {
+      color: var(--text);
+      border-color: var(--text-dim);
+    }
+
+    .custom-channel-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Action Submit Buttons ──────────────────── */
+    .submit-card {
+      background: rgba(99, 102, 241, 0.04);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .agreement-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+      cursor: pointer;
+    }
+
+    .agreement-check input {
+      margin-top: 0.15rem;
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Sliding Side Customization Drawer ───────── */
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -480px;
+      width: 480px;
+      max-width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.6);
+      border-left: 1px solid var(--border);
+      z-index: 1000;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .close-drawer-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .close-drawer-btn:hover {
+      color: var(--text);
+    }
+
+    .drawer-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .drawer-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.4);
+    }
+
+    /* ── Modals & Banners ───────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #161D30;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      width: 100%;
+      max-width: 540px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+      transform: translateY(20px) scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .modal-header svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--warning);
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-body p {
+      margin-bottom: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .toast-banner {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--success);
+      color: white;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      font-weight: 600;
+      font-size: 0.88rem;
+      z-index: 3000;
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .toast-banner.open {
+      transform: translateX(0);
+    }
+
+    .toast-banner.error {
+      background: var(--danger);
+    }
+
+    /* ── Real-time SSE logs panel ──────────────── */
+    .status-panel {
+      margin-top: 2rem;
+    }
+
+    .status-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .status-stat-pills {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .status-pill {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.06);
+    }
+    .status-pill.success { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+    .status-pill.running { background: rgba(99, 102, 241, 0.12); color: var(--primary); }
+    .status-pill.blocked { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+    .status-pill.queued { background: rgba(255, 255, 255, 0.06); color: var(--text-dim); }
+
+    .status-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 300px;
+      overflow-y: auto;
+      background: rgba(11, 15, 25, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 24px 120px 1fr 100px;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .status-row:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .status-row.running {
+      border-color: rgba(99, 102, 241, 0.15);
+      background: rgba(99, 102, 241, 0.02);
+    }
+
+    .status-icon {
+      font-size: 0.9rem;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .status-row.running .status-icon {
+      color: var(--primary);
+      animation: spin 1s linear infinite;
+    }
+
+    .status-row.success .status-icon { color: var(--success); }
+    .status-row.blocked .status-icon { color: var(--danger); }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-plat {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-msg {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-progress-wrapper {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .status-progress-bar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* ── Campaign Results Section ─────────────── */
+    .results-panel {
+      margin-top: 2.5rem;
+    }
+
+    .results-table-card {
+      overflow-x: auto;
+      background: rgba(11, 15, 25, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .results-table th {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    .results-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .results-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .results-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .results-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Password Spoiler */
+    .spoiler-field {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: all 0.2s;
+    }
+
+    .spoiler-field.blurred {
+      background: #374151;
+      color: transparent;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+    }
+
+    /* Obsidian Sync/Save Section */
+    .save-matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .save-matrix-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .save-card-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .save-card-option h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .save-card-option p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+    }
+
+    .save-action-row {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .save-action-row input {
+      flex: 1;
+      background: rgba(11, 15, 25, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-size: 0.82rem;
+    }
+
+    .save-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-btn:hover {
+      background: #4f46e5;
+    }
+
+    .purge-section {
+      margin-top: 1.5rem;
+      border: 1px dashed rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.03);
+      padding: 1.25rem;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .purge-text h4 {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .purge-text p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    .purge-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .purge-btn:hover {
+      background: #dc2626;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+    }
+
+    /* ── Settings Panel CSS ─────────────────────── */
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ── Help Modal CSS ────────────────────────── */
+    .help-tabs-container {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+      gap: 0.25rem;
+    }
+    .help-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 0.5rem 0.85rem;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .help-tab-btn:hover {
+      color: var(--text);
+    }
+    .help-tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .help-tab-panel {
+      display: none;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .help-tab-panel.active {
+      display: block;
+      animation: fade-in 0.25s ease;
+    }
+    .help-tab-panel h4 {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-top: 1rem;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+    .help-tab-panel h4:first-of-type {
+      margin-top: 0;
+    }
+    .help-tab-panel p {
+      margin-bottom: 0.75rem;
+    }
+    .help-tab-panel ul, .help-tab-panel ol {
+      padding-left: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+    .help-tab-panel li {
+      margin-bottom: 0.35rem;
+    }
+
+    /* ── Premium Modal CSS ─────────────────────── */
+    .premium-wave {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      height: 45px;
+      margin: 1.25rem 0;
+    }
+    .premium-wave span {
+      display: block;
+      width: 4px;
+      height: 12px;
+      background: var(--warning);
+      border-radius: 2px;
+      animation: wave 1.2s ease-in-out infinite alternate;
+    }
+    .premium-wave span:nth-child(2) { height: 28px; animation-delay: 0.2s; }
+    .premium-wave span:nth-child(3) { height: 38px; animation-delay: 0.4s; }
+    .premium-wave span:nth-child(4) { height: 18px; animation-delay: 0.6s; }
+    .premium-wave span:nth-child(5) { height: 32px; animation-delay: 0.8s; }
+    @keyframes wave {
+      0% { transform: scaleY(1); }
+      100% { transform: scaleY(0.25); }
+    }
+    .premium-card-tier {
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      background: rgba(245, 158, 11, 0.03);
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.2s;
+    }
+    .premium-card-tier:hover {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.06);
+    }
+    .premium-tier-details h4 {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    .premium-tier-details p {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0;
+    }
+    .premium-price {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--warning);
+      text-align: right;
+    }
+    .stripe-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.45rem;
+      background: #635BFF;
+      color: white;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-top: 0.35rem;
+    }
+    .premium-checkout-btn {
+      background: linear-gradient(135deg, var(--warning), #d97706);
+      color: #111;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 0.55rem 1.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      text-align: center;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+    }
+    .premium-checkout-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(245, 158, 11, 0.35);
+    }
+
+    /* ── Footer ───────────────────────────────────── */
+    .page-footer {
+      text-align: center;
+      margin-top: 4rem;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Floating bg particles -->
+  <div class="bg-particles" id="particles"></div>
+
+  <!-- Toast Notification Banner -->
+  <div class="toast-banner" id="toast">
+    <span id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <div class="app-container">
+
+    <!-- ── Top Action & User Bar ── -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <img src="domino_logo.png" alt="Domino AI Brand Automation Suite Logo" />
+        <h2>Domino AI Suite</h2>
+      </div>
+      <div class="top-bar-right">
+        <span class="top-bar-user" id="userBadge">Local Operator</span>
+        <button class="top-bar-btn" id="openHelpBtn" title="Help Documents & Operator Guide">
+          ❓ Help Guide
+        </button>
+        <button class="top-bar-btn" id="openPremiumBtn" style="border-color: rgba(245, 158, 11, 0.3); color: var(--warning);" title="Domino AI Premium Upgrades">
+          💎 Premium Upgrade
+        </button>
+        <button class="top-bar-btn" id="openSettingsBtn" title="Domino Workspace Settings">
+          ⚙ Settings
+        </button>
+        <button class="top-bar-btn lock-btn" id="lockSessionBtn" title="Lock domino workspace immediately">
+          🔒 Lock Session
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Ethical Code of Conduct Banner ── -->
+    <div class="conduct-banner">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+      </svg>
+      <div class="conduct-content">
+        <h3>Responsible Automation & Legitimate Representation Code</h3>
+        <p>
+          Domino AI is built strictly for legitimate brand positioning, local mom-and-pop business automation, and legal representation. Operators represent and warrant that they possess all legal ownership rights or authorized power of attorney to establish and maintain profiles for the target brand entity.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Main Workspace ── -->
+    <div class="workspace-grid">
+
+      <!-- Left Column: Primary Settings and Forms -->
+      <div class="glass-card">
+        <h2>👤 Business Core Profile</h2>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.25rem; line-height: 1.4;">
+          Define the official business details. Domino will deploy these identity attributes consistently across your target platforms to establish an instant social media presence.
+        </p>
+
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="field-group">
+              <label for="name">Official Brand / Business Name</label>
+              <input type="text" id="name" name="name" placeholder="Acme Local Services" required />
+            </div>
+
+            <div class="field-group">
+              <label for="gender">Brand Representation Tone</label>
+              <select id="gender" name="gender" required>
+                <option value="professional" selected>Professional / Corporate</option>
+                <option value="warm">Warm / Community-Focused</option>
+                <option value="bold">Bold / Innovative</option>
+                <option value="playful">Playful / Youthful</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="birthday">Launch / Founded Date</label>
+              <input type="text" id="birthday" name="birthday" placeholder="MM/DD/YYYY or Year" required />
+            </div>
+
+            <div class="field-group">
+              <label for="email">Official Corporate Email</label>
+              <input type="email" id="email" name="email" placeholder="contact@acme.com" required />
+            </div>
+
+            <div class="field-group full">
+              <label for="occupation">Industry Segment</label>
+              <input type="text" id="occupation" name="occupation" placeholder="e.g. Residential Plumbing, Specialty Coffee Roast" />
+            </div>
+
+            <div class="field-group full">
+              <label for="location">Location Headquarters</label>
+              <input type="text" id="location" name="location" placeholder="e.g. Austin, TX" />
+            </div>
+
+            <div class="field-group full">
+              <label for="bio">Primary Business Description / Bio</label>
+              <textarea id="bio" name="bio" placeholder="Provide a brief summary of the business services, mission, and community value." required></textarea>
+            </div>
+
+            <div class="field-group full">
+              <label>Profile Branding Assets (Upload up to 3 Images)</label>
+              <label class="file-drop" for="images">
+                <input type="file" id="images" name="images" accept="image/*" multiple />
+                <svg viewBox="0 0 24 24">
+                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                </svg>
+                <span class="drop-label" id="dropLabel">
+                  <span>Click to select brand logos</span> or drag and drop images here<br />
+                  <small>PNG / JPG format. Up to 3 assets used sequentially.</small>
+                </span>
+              </label>
+              <div id="previewGrid" class="preview-grid" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;"></div>
+            </div>
+          </div>
+
+          <!-- Proxy Check Status Strip -->
+          <div class="network-bar">
+            <div class="proxy-status">
+              <div class="proxy-dot checking" id="proxyIndicator"></div>
+              <span id="proxyLabel">Assessing local network proxies...</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">IP Guard Active</span>
+          </div>
+
+          <!-- Channel Selection Area -->
+          <div class="controls-row">
+            <h3 style="font-size: 0.95rem; font-weight: 600;">🌐 Deployment Channels Matrix</h3>
+            <div class="controls-left">
+              <button type="button" class="controls-btn" id="selectAllBtn">Check All</button>
+              <button type="button" class="controls-btn" id="selectNoneBtn">Clear All</button>
+            </div>
+          </div>
+
+          <!-- Channel Tabs -->
+          <div class="tabs-container">
+            <button type="button" class="tab-btn active" data-tab="global">Global Social Presence</button>
+            <button type="button" class="tab-btn" data-tab="asian">International & Asian Growth</button>
+          </div>
+
+          <!-- Tab Content Panels -->
+          <div class="tab-panel active" id="tab-global">
+            <div class="channels-grid" id="globalGrid">
+              <!-- Injected by app.js -->
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-asian">
+            <p style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.75rem; line-height: 1.4;">
+              Asian growth social networks have rapidly expanded international compatibility, providing unique regional local brand presence opportunities.
+            </p>
+            <div class="channels-grid" id="asianGrid">
+              <!-- Injected by app.js -->
+            </div>
+          </div>
+
+          <!-- Custom channel creator -->
+          <p style="font-size: 0.78rem; font-weight: 600; color: var(--primary); margin-bottom: 0.4rem;">+ Register custom target channel</p>
+          <div class="custom-channel-row">
+            <input type="text" id="customChannelInput" placeholder="Enter target site (e.g. Nextdoor, Yelp, Threads)" />
+            <button type="button" class="save-btn" id="addCustomChannelBtn">Add Channel</button>
+          </div>
+
+          <!-- Ethical Confirmation & Launcher -->
+          <div class="submit-card">
+            <label class="agreement-check">
+              <input type="checkbox" id="ethicalConsentCheck" required />
+              <span>
+                I agree to the <strong>Code of Conduct</strong>. I represent that I possess lawful operational authority over this brand entity, and will use the auto-generated credentials solely in compliance with terms of service.
+              </span>
+            </label>
+            <button type="submit" class="primary-btn" id="launchCampaignBtn">
+              🚀 Deploy Brand Presence Matrix
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Right Column: Interactive Quick-Start & Guides -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <div class="glass-card">
+          <h2>📖 Operations Hub</h2>
+          <p style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 0.75rem;">
+            Welcome to the <strong>Domino Brand Presence Builder</strong>. This utility streamlines social channel setup for startup organizations.
+          </p>
+          <ol style="padding-left: 1.1rem; font-size: 0.8rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 0.6rem;">
+            <li>Input the central brand assets in the <strong>Business Core Profile</strong>.</li>
+            <li>Enable specific platform checkboxes under <strong>Global</strong> or <strong>Asian Growth</strong> categories.</li>
+            <li>Click <strong>Edit Details</strong> on any checked channel card to override handles, custom bios, or connected emails.</li>
+            <li>Execute deployment. View real-time progress, handle interactive MFA checks directly on-screen, and compile a self-contained local <strong>Obsidian Vault</strong> folder containing your branding credentials.</li>
+          </ol>
+        </div>
+
+        <!-- Verification MFA input relay -->
+        <div class="glass-card hidden" id="verifyPanel">
+          <h2 style="color: var(--danger); border-bottom-color: rgba(239,68,68,0.2);">✋ Interactive Verification Needed</h2>
+          <p style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.75rem;">
+            Some target sites require one-time security confirmation (SMS / Email MFA). Enter code below.
+          </p>
+          <div id="verifyList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+        </div>
+
+      </div>
+
+    </div><!-- /workspace-grid -->
+
+    <!-- ── Live Campaign Status Dashboard Card ── -->
+    <div class="glass-card hidden" id="statusPanel">
+      <div class="status-header-row">
+        <h2>⟳ Deployment Progress & Analytics</h2>
+        <div class="status-stat-pills" id="statusSummary">
+          <span class="status-pill queued">0 Queued</span>
+        </div>
+      </div>
+      <div class="status-rows-container" id="statusBody">
+        <!-- Live status rows populated dynamically -->
+      </div>
+    </div>
+
+    <!-- ── Campaign Complete Results Table & Exporter ── -->
+    <div class="glass-card hidden" id="resultsPanel">
+      <h2 style="color: var(--success); border-bottom-color: rgba(16,185,129,0.2);">✦ Campaign Complete: Presence Matrix Established</h2>
+      <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.25rem;">
+        Your brand identity pages have been deployed successfully. All credentials, verification steps, and profile endpoints are detailed below.
+      </p>
+
+      <div class="results-table-card">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Platform Channel</th>
+              <th>Status</th>
+              <th>Official Handle</th>
+              <th>Secure Password</th>
+              <th>Endpoint URL</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody">
+            <!-- Results rows built dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- File Exporter Operations Matrix -->
+      <div style="border-top: 1px solid var(--border); padding-top: 1.25rem;">
+        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">📁 Save Marketing Assets & Vault</h3>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.25rem;">
+          To guarantee zero-database compliance, Domino maintains zero centralized copies of your branding credentials. Choose below to save your structured local Obsidian Campaign Vault, or discard this session's assets entirely.
+        </p>
+
+        <div class="save-matrix-grid">
+          
+          <!-- Save directly to Vault Option -->
+          <div class="save-card-option">
+            <div>
+              <h3>💾 Save directly to Obsidian Folder</h3>
+              <p>Extracts and copies this structured Campaign folder straight to your local Obsidian system directories.</p>
+            </div>
+            <div>
+              <div id="favVaultStatus" style="font-size: 0.74rem; color: var(--text-dim); margin-bottom: 0.5rem; word-break: break-all;">
+                Favorite Obsidian Path: None configured
+              </div>
+              <div class="save-action-row" id="favVaultActionRow">
+                <button type="button" class="save-btn" style="width: 100%;" id="saveToFavBtn" disabled>
+                  Save to Favorite Directory
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save to Custom Path Option -->
+          <div class="save-card-option">
+            <div>
+              <h3>📂 Save to Custom Path</h3>
+              <p>Write Campaign Vault to a custom directory on your system disk (input an absolute directory path).</p>
+            </div>
+            <div class="save-action-row">
+              <input type="text" id="customSavePathInput" placeholder="C:\Users\Username\Documents\Obsidian" />
+              <button type="button" class="save-btn" id="saveToCustomBtn">Save</button>
+            </div>
+          </div>
+
+          <!-- Download ZIP Archive Option -->
+          <div class="save-card-option" style="grid-column: 1 / -1; flex-direction: row; align-items: center;">
+            <div style="flex: 1;">
+              <h3>📦 Download Offline ZIP Archives</h3>
+              <p style="margin-bottom: 0;">On-demand download of structured Obsidian Markdown .ZIP and backup Excel spreadsheets.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="#" id="downloadExcelBtn" class="save-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" target="_blank">
+                Spreadsheet Report (.xlsx)
+              </a>
+              <a href="#" id="downloadZipBtn" class="save-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center; background: #4b5563;" target="_blank">
+                Obsidian Vault (.zip)
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Destructive Campaign Discard Panel -->
+        <div class="purge-section">
+          <div class="purge-text">
+            <h4>🗑 Destructive Session Discard</h4>
+            <p>
+              Operator privacy protection. Completely scrubs and wipes all logs, Excel sheets, and temporary campaign assets from local server storage immediately.
+            </p>
+          </div>
+          <button type="button" class="purge-btn" id="discardPurgeBtn">Discard & Scrub Files</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Settings Glass Overlay Modal ── -->
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal-card">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; justify-content: space-between;">
+          <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--text);">
+            ⚙ Domino Workspace Settings
+          </h3>
+          <button type="button" class="close-drawer-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="modal-body settings-grid">
+          
+          <div class="field-group">
+            <label for="settingsFavPath">Favorite Obsidian Vault Location</label>
+            <input type="text" id="settingsFavPath" placeholder="C:\Users\Username\OneDrive\Desktop\Obsidian_Vault" />
+            <span style="font-size: 0.72rem; color: var(--text-dim);">
+              Absolute path to your primary Obsidian Vault. Domino will auto-save campaign nodes here on completion.
+            </span>
+          </div>
+
+          <div class="field-group">
+            <label>Security Biometrics (Enrolled Devices)</label>
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+              <span id="biometricStatusLabel" style="font-size: 0.8rem; color: var(--text-dim);">
+                Detecting biometric registration status...
+              </span>
+              <button type="button" class="save-btn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" id="enrollBiometricsBtn">
+                Enroll Device
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>IP Safety Monitor</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem;">
+              <span style="font-size: 0.8rem; color: var(--text-dim);">Bypass network proxy health check gatekeeper</span>
+              <label style="position: relative; width: 40px; height: 20px; cursor: pointer;">
+                <input type="checkbox" id="settingsProxyBypass" style="display: none;" />
+                <span id="settingsProxyBypassSlider" style="position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 20px; transition: 0.2s;"></span>
+              </label>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--danger);">
+              WARNING: Bypassing exposes your raw office/home IP connection. Use for test environments only.
+            </span>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--border); padding-top: 1rem;">
+          <button type="button" class="top-bar-btn" id="saveSettingsBtn" style="background: var(--primary); font-weight: 600;">
+            Apply and Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Interactive Help Center Glass Overlay Modal ── -->
+    <div class="modal-overlay" id="helpModal">
+      <div class="modal-card">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; justify-content: space-between;">
+          <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--text);">
+            ❓ Domino Help Center & Guide
+          </h3>
+          <button type="button" class="close-drawer-btn" id="closeHelpBtn">&times;</button>
+        </div>
+        <div class="modal-body" style="padding-top: 0.5rem;">
+          
+          <div class="help-tabs-container">
+            <button type="button" class="help-tab-btn active" data-help-tab="general">Workspace Ops</button>
+            <button type="button" class="help-tab-btn" data-help-tab="proxy">IP Safety Guard</button>
+            <button type="button" class="help-tab-btn" data-help-tab="wrappers">Secure Comms Wrappers</button>
+          </div>
+
+          <div class="help-tab-panel active" id="help-tab-general">
+            <h4>🔐 Workspace Access & Security</h4>
+            <p>
+              Domino AI locks down operations via a private **Master Password** and standard **WebAuthn Biometric credentials** (TouchID, FaceID, or Windows Hello). Key encryption salts are generated locally on startup, ensuring no operations data is stored unprotected on the disk.
+            </p>
+            <h4>📁 Zero-Database Obsidian vaulting</h4>
+            <p>
+              Operator privacy is fully respected. Domino maintains zero operational databases of your brand registration logs. Everything is stored locally.
+            </p>
+            <ol>
+              <li>Configure your <strong>Favorite Obsidian Location</strong> in settings.</li>
+              <li>Domino compiles a structured folder: index file `Campaign_Summary.md`, brand details, and per-platform logs inside `Platforms/` utilizing standard spoiler syntax `||password||` for access keys.</li>
+              <li>Upon complete, choose to save directly to Obsidian, copy to a custom folder, or hit **Scrub & Discard** to permanently purge server caches.</li>
+            </ol>
+            <h4>⚙ Manipulation Side Drawer</h4>
+            <p>
+              Click <strong>Edit Details</strong> on any checked channel card. This slides out a custom sidebar allowing you to customize store handles, localized bios, and branch emails for specific platforms without touching other core default values.
+            </p>
+          </div>
+
+          <div class="help-tab-panel" id="help-tab-proxy">
+            <h4>🛡 Why Proxy Shields Are Essential</h4>
+            <p>
+              When Domino automates account creations across 20+ networks simultaneously, modern platforms easily spot the excessive volume and blacklist the originating IP connection.
+            </p>
+            <ul>
+              <li><strong>IP Pool Guard:</strong> Tests connection health on boot. Green indicates a rotating residential proxy pool is actively hiding your home/office identity.</li>
+              <li><strong>Exposure Modal:</strong> Bypassing the proxy block is highly dangerous and should only be triggered in private sandboxed environments. Direct launches will expose your raw location and trigger instant account locks on target platforms.</li>
+            </ul>
+          </div>
+
+          <div class="help-tab-panel" id="help-tab-wrappers">
+            <h4>📞 Secure Call & Phone Wrappers</h4>
+            <p>
+              Social platforms require SMS/Voice MFA confirmations during registration. To preserve the operator's private phone number and maintain clean brand separation, we recommend configuring secure external **communications wrappers**:
+            </p>
+            <ul>
+              <li><strong>Twilio SMS Gateway:</strong> Purchase temporary regional mobile virtual numbers specifically for SMS receipt. Connect standard in-app notifications directly.</li>
+              <li><strong>Signal Messenger Workspaces:</strong> Establish Signal accounts for localized client communication, keeping team communications encrypted.</li>
+              <li><strong>Burner / Hushed Apps:</strong> Secure VoIP numbers for localized voice call forwards and temporary account lock verifications.</li>
+            </ul>
+            <h4>📧 Secure Email Wrappers</h4>
+            <p>
+              Platforms will prompt for registration confirmation links. Utilize isolated secure email services:
+            </p>
+            <ul>
+              <li><strong>ProtonMail Business:</strong> End-to-end encrypted inbox hosting utilizing zero-access server databases. Keep all platform verification tokens private.</li>
+              <li><strong>Tutanota:</strong> German-hosted, privacy-focused open source secure email wrappers supporting custom corporate domain settings.</li>
+              <li><strong>DuckDuckGo Email Protection:</strong> Generate unique `@duck.com` forwarding aliases specifically for different social channels to prevent tracking.</li>
+            </ul>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--border); padding-top: 0.75rem; justify-content: center;">
+          <p style="font-size:0.72rem; color:var(--text-dim);">Domino AI Local Documentation · Legitimate Marketing Version 2.4</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Premium Upgrades Stripe Glass Overlay Modal ── -->
+    <div class="modal-overlay" id="premiumModal">
+      <div class="modal-card" style="border-color: rgba(245, 158, 11, 0.3); max-width: 500px;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(245, 158, 11, 0.2); padding-bottom: 0.5rem; justify-content: space-between;">
+          <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--warning);">
+            💎 Domino Premium Lab: AI Voice Overdrive
+          </h3>
+          <button type="button" class="close-drawer-btn" id="closePremiumBtn">&times;</button>
+        </div>
+        <div class="modal-body" style="padding-top: 0.5rem;">
+          
+          <div class="premium-wave">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          <p style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; text-align: center; margin-bottom: 1.25rem;">
+            Unlock advanced biometric branding. Deploy premium AI text-to-speech, localized voiceovers, and voice-changing telephone wrappers for customer engagement campaigns.
+          </p>
+
+          <!-- 1-Week Pass -->
+          <div class="premium-card-tier">
+            <div class="premium-tier-details">
+              <h4>Voice Overdrive: 1-Week Access</h4>
+              <p>Full AI voice cloning, voice change wrappers, and audio ad generation for 7 days.</p>
+              <span class="stripe-badge">Secure Stripe Pass</span>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <div class="premium-price">$7.00</div>
+              <a href="https://buy.stripe.com/bJe4gy79q2u40gQ8yrbAs09" target="_blank" class="premium-checkout-btn" style="margin-top:0.5rem;">
+                Get 1-Week
+              </a>
+            </div>
+          </div>
+
+          <!-- 1-Month Sub -->
+          <div class="premium-card-tier">
+            <div class="premium-tier-details">
+              <h4>Voice Overdrive: Monthly Sub</h4>
+              <p>Reoccurring unlimited access to standard voice changes, telephone wrappers, and priority generation queues.</p>
+              <span class="stripe-badge">Recurring monthly</span>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              <div class="premium-price">$20.00 <span style="font-size: 0.72rem; color: var(--text-dim); font-weight: normal;">/ mo</span></div>
+              <a href="https://buy.stripe.com/3cI3cugK0fgQ6Feg0TbAs0a" target="_blank" class="premium-checkout-btn" style="margin-top:0.5rem; background: linear-gradient(135deg, var(--warning), var(--primary)); color: white;">
+                Subscribe
+              </a>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--border); padding-top: 0.75rem; flex-direction: column; align-items: center; gap: 0.25rem;">
+          <p style="font-size:0.68rem; color:var(--text-dim);">
+            Stripe Publishable Key: <code style="font-family: monospace; font-size: 0.62rem; color: var(--warning); word-break: break-all;">pk_live_51RrpKEBBpTA6hCXQTUuu9BllJ4gs2U8NabvMmydc2jApr5rli2MBoY4xT8SOhTMCN7uYEvLRR4gria6DqqTP2VzV00mo8QYe32</code>
+          </p>
+          <p style="font-size:0.62rem; color:rgba(255,255,255,0.25);">Stripe Gateway Encrypted · Domino Labs © 2026</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proxy Exposure Warning Glass Modal ── -->
+    <div class="modal-overlay" id="proxyModal">
+      <div class="modal-card" style="border-color: rgba(239, 68, 68, 0.3);">
+        <div class="modal-header">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <h3 style="color: var(--danger);">⚠️ CRITICAL IP EXPOSURE RISK</h3>
+        </div>
+        <div class="modal-body">
+          <p>
+            <strong>No active residential proxies were detected on your local server.</strong>
+          </p>
+          <p>
+            Running automated social presence creations directly from your home or office IP address (**<span id="proxyModalIp">Direct</span>**) will expose your local address to all selected networks simultaneously.
+          </p>
+          <p style="color: var(--warning);">
+            Platform bot-detection algorithms are highly aggressive. Operating without a rotating proxy pool will likely cause rapid IP address blocking, flagged accounts, or locked brand endpoints.
+          </p>
+          <label class="agreement-check" style="margin-top: 1rem; border: 1px solid rgba(255,255,255,0.06); padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.15); align-items: center;">
+            <input type="checkbox" id="proxyBypassConsentCheck" />
+            <span style="color: var(--text);">
+              I explicitly authorize Domino to bypass proxy checks and launch using my direct IP connection.
+            </span>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="top-bar-btn" id="closeProxyModalBtn">
+            Cancel & Configure Proxy
+          </button>
+          <button type="button" class="purge-btn" id="forceLaunchBtn" disabled style="padding: 0.5rem 1rem;">
+            Proceed and Bypass Shield
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slide-Out Customization Drawer ── -->
+    <div class="drawer" id="sideDrawer">
+      <div class="drawer-header">
+        <h3 id="drawerTitle">Customize Platform Channel</h3>
+        <button class="close-drawer-btn" id="closeDrawerBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.5rem; line-height: 1.4;">
+          Define custom brand values specifically for this channel. Empty fields will automatically inherit the global Business Core Profile values.
+        </p>
+
+        <div class="field-group">
+          <label>Platform Name Override</label>
+          <input type="text" id="drawerPlatName" readonly style="background: rgba(255,255,255,0.02); color: var(--text-dim);" />
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomName">Custom Channel Display Name</label>
+          <input type="text" id="drawerCustomName" placeholder="e.g. Acme Regional Branch" />
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomEmail">Custom Channel Email</label>
+          <input type="email" id="drawerCustomEmail" placeholder="e.g. branch@acme.com" />
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomHandle">Target Handle / Username</label>
+          <input type="text" id="drawerCustomHandle" placeholder="e.g. acmepresence" />
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomBio">Platform Specific Short Bio</label>
+          <textarea id="drawerCustomBio" placeholder="Platform-focused corporate bio description..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomOccupation">Platform Specific Segment</label>
+          <input type="text" id="drawerCustomOccupation" placeholder="e.g. Retail Division" />
+        </div>
+
+        <div class="field-group">
+          <label for="drawerCustomLocation">Platform Location headquarters</label>
+          <input type="text" id="drawerCustomLocation" placeholder="e.g. San Francisco, CA" />
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button type="button" class="primary-btn" id="saveDrawerBtn" style="padding: 0.65rem;">
+          Save Platform Customization
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      &copy; 2026 Domino AI Business Solutions &nbsp;·&nbsp; Powered by the Loki Persona Engine
+    </footer>
+
+  </div><!-- /app-container -->
+
+  <script src="app.js"></script>
+  <script>
+    // ── Floating particles generator ──
+    (function () {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 40; i++) {
+        const s = document.createElement('span');
+        s.style.left = Math.random() * 100 + '%';
+        s.style.animationDuration = (7 + Math.random() * 10) + 's';
+        s.style.animationDelay = Math.random() * 5 + 's';
+        s.style.width = s.style.height = (1.5 + Math.random() * 2) + 'px';
+        container.appendChild(s);
+      }
+    })();
+  </script>
+</body>
+</html>

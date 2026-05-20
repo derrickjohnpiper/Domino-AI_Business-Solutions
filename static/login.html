@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domino AI — Secure Gateway</title>
+  <meta name="description" content="Local lockdown gate for Domino AI brand builder." />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary:      #6366F1; /* Slate indigo */
+      --primary-glow: rgba(99, 102, 241, 0.4);
+      --dark:         #0B0F19; /* Deep space slate */
+      --dark-card:    #161D30;
+      --border:       rgba(255, 255, 255, 0.08);
+      --text:         #F3F4F6;
+      --text-dim:     #9CA3AF;
+      --radius:       16px;
+      --danger:       #EF4444;
+      --success:      #10B981;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #1e1b4b 0%, var(--dark) 90%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Animated background particles ── */
+    .bg-particles {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+      overflow: hidden;
+    }
+    .bg-particles span {
+      position: absolute;
+      width: 2.5px; height: 2.5px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { opacity: 0; transform: translateY(105vh) scale(0); }
+      10%  { opacity: 0.5; }
+      90%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-5vh) scale(1.5); }
+    }
+
+    /* ── Login card ── */
+    .auth-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      padding: 1.5rem;
+    }
+
+    .auth-card {
+      background: rgba(22, 29, 48, 0.75);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.75rem 2.25rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+      animation: card-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes card-enter {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Branding ── */
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
+    .auth-brand img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 0 35px var(--primary-glow);
+      margin-bottom: 0.85rem;
+      animation: pulse-glow 4s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-glow {
+      from { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
+      to   { box-shadow: 0 0 45px rgba(99, 102, 241, 0.5); }
+    }
+    .auth-brand h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .auth-brand p {
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
+    /* ── Forms ── */
+    .auth-form { display: none; }
+    .auth-form.active { display: block; animation: fade-in 0.4s ease; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 0.45rem;
+    }
+    .form-group input {
+      width: 100%;
+      background: rgba(11, 15, 25, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+    .form-group input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* ── Buttons ── */
+    .auth-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: #FFF;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      margin-top: 0.5rem;
+    }
+    .auth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+    .auth-btn:active { transform: translateY(0); }
+    .auth-btn:disabled {
+      opacity: 0.5; cursor: not-allowed; transform: none;
+    }
+
+    /* ── Biometrics Button ── */
+    .biometric-btn {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+    .biometric-btn:hover {
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .biometric-btn svg {
+      width: 18px; height: 18px;
+      fill: var(--primary);
+    }
+
+    /* ── Messages ── */
+    .auth-msg {
+      text-align: center;
+      font-size: 0.82rem;
+      margin-top: 0.85rem;
+      min-height: 1.2em;
+      transition: opacity 0.3s;
+    }
+    .auth-msg.error { color: var(--danger); }
+    .auth-msg.success { color: var(--success); }
+
+    /* ── Password strength ── */
+    .pw-strength {
+      height: 3px;
+      border-radius: 3px;
+      margin-top: 0.45rem;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      display: none;
+    }
+    .pw-strength-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    /* ── Enroll Banner ── */
+    .enroll-banner {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px dashed var(--success);
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      margin-top: 1rem;
+      display: none;
+      text-align: center;
+    }
+    .enroll-link {
+      color: var(--success);
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background particles -->
+  <div class="bg-particles" id="particles"></div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <!-- Branding -->
+      <div class="auth-brand">
+        <img src="domino_logo.png" alt="Domino AI Logo" id="brandLogo" />
+        <h1 id="brandTitle">Domino AI</h1>
+        <p id="brandSub">Secure Brand lock</p>
+      </div>
+
+      <!-- Setup Form (First Run) -->
+      <form class="auth-form" id="setupForm">
+        <div class="form-group">
+          <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.5;">
+            Welcome! Set up a private **Master Password** to lock your local workspace. All marketing configurations remain entirely offline.
+          </p>
+          <label for="setupName">Operator Display Name</label>
+          <input type="text" id="setupName" placeholder="Mom & Pop Shop" required />
+        </div>
+        <div class="form-group">
+          <label for="setupPassword">Master Password</label>
+          <input type="password" id="setupPassword" placeholder="Minimum 6 characters" required minlength="6" />
+          <div class="pw-strength" id="strengthWrap"><div class="pw-strength-bar" id="pwBar"></div></div>
+        </div>
+        <button type="submit" class="auth-btn" id="setupBtn">Set Master Password</button>
+        <div class="auth-msg" id="setupMsg"></div>
+      </form>
+
+      <!-- Standard Login Form -->
+      <form class="auth-form" id="loginForm">
+        <div class="form-group">
+          <label for="loginPassword">Master Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter Master Password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="auth-btn" id="loginBtn">Open Workspace</button>
+        
+        <!-- Biometric / Passkey Login -->
+        <button type="button" class="biometric-btn" id="biometricBtn" style="display:none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+          </svg>
+          Touch ID / Windows Hello
+        </button>
+
+        <div class="auth-msg" id="loginMsg"></div>
+      </form>
+
+      <!-- Biometrics enrollment option (appears post-login / post-setup) -->
+      <div class="enroll-banner" id="enrollBanner">
+        🔒 Enable **biometric unlocking** (fingerprint / face ID) for instant passwordless access? <span class="enroll-link" id="enrollLink">Enroll Device</span>
+      </div>
+
+      <div class="auth-footer">
+        &copy; 2026 Domino AI Business Solutions &middot; Local Security Lock
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Particle generator ──
+    (function () {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 35; i++) {
+        const s = document.createElement('span');
+        s.style.left = Math.random() * 100 + '%';
+        s.style.animationDuration = (8 + Math.random() * 10) + 's';
+        s.style.animationDelay = Math.random() * 6 + 's';
+        s.style.width = s.style.height = (1.5 + Math.random() * 2) + 'px';
+        container.appendChild(s);
+      }
+    })();
+
+    // ── Auth Status check ──
+    async function checkAuthStatus() {
+      try {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+        
+        if (data.setup_required) {
+          document.getElementById('setupForm').classList.add('active');
+          document.getElementById('strengthWrap').style.display = 'block';
+        } else {
+          document.getElementById('loginForm').classList.add('active');
+          if (data.biometrics_registered && window.PublicKeyCredential) {
+            document.getElementById('biometricBtn').style.display = 'flex';
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check lock screen status:", err);
+      }
+    }
+
+    // ── Password strength ──
+    const pwInput = document.getElementById('setupPassword');
+    const pwBar = document.getElementById('pwBar');
+    pwInput.addEventListener('input', () => {
+      const v = pwInput.value;
+      let score = 0;
+      if (v.length >= 6) score++;
+      if (v.length >= 10) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const pct = (score / 5) * 100;
+      const colors = ['#EF4444', '#F59E0B', '#10B981', '#059669', '#047857'];
+      pwBar.style.width = pct + '%';
+      pwBar.style.background = colors[Math.max(0, score - 1)] || '#EF4444';
+    });
+
+    function showMsg(el, text, type) {
+      el.textContent = text;
+      el.className = 'auth-msg ' + type;
+    }
+
+    // Helper: ArrayBuffer converter for WebAuthn Base64 strings
+    function bufferDecode(value) {
+      return Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    }
+
+    function bufferEncode(value) {
+      return btoa(String.fromCharCode(...new Uint8Array(value)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=/g, "");
+    }
+
+    // ── Master Password Setup ──
+    document.getElementById('setupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('setupBtn');
+      const msg = document.getElementById('setupMsg');
+      btn.disabled = true;
+      btn.textContent = 'Securing workspace…';
+      
+      try {
+        const res = await fetch('/api/auth/setup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('setupName').value,
+            password: pwInput.value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showMsg(msg, data.error || 'Setup failed', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Set Master Password';
+        } else {
+          showMsg(msg, 'Workspace locked and secured! ✓', 'success');
+          // Offer Biometrics Setup
+          if (window.PublicKeyCredential) {
+            document.getElementById('setupForm').classList.remove('active');
+            document.getElementById('enrollBanner').style.display = 'block';
+          } else {
+            setTimeout(() => window.location.href = '/', 1000);
+          }
+        }
+      } catch (err) {
+        showMsg(msg, 'Local server connection error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Set Master Password';
+      }
+    });
+
+    // ── Master Password Login ──
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const msg = document.getElementById('loginMsg');
+      btn.disabled = true;
+      btn.textContent = 'Unlocking…';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: document.getElementById('loginPassword').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showMsg(msg, data.error || 'Unlock failed', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Open Workspace';
+        } else {
+          showMsg(msg, 'Unlocked successfully!', 'success');
+          // Offer biometric setup link if they logged in with password but haven't enrolled yet
+          setTimeout(() => window.location.href = '/', 800);
+        }
+      } catch (err) {
+        showMsg(msg, 'Local server connection error.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Open Workspace';
+      }
+    });
+
+    // ── WebAuthn Biometric Registration ──
+    document.getElementById('enrollLink').addEventListener('click', async () => {
+      const banner = document.getElementById('enrollBanner');
+      try {
+        const optRes = await fetch('/api/auth/webauthn/register/options', { method: 'POST' });
+        const options = await optRes.json();
+        
+        options.challenge = bufferDecode(options.challenge);
+        options.user.id = bufferDecode(options.user.id);
+
+        const credential = await navigator.credentials.create({ publicKey: options });
+        
+        const verifyRes = await fetch('/api/auth/webauthn/register/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: credential.id,
+            response: {
+              attestationObject: bufferEncode(credential.response.attestationObject),
+              clientDataJSON: bufferEncode(credential.response.clientDataJSON)
+            }
+          })
+        });
+        
+        const verifyData = await verifyRes.json();
+        if (verifyData.ok) {
+          banner.innerHTML = "🎉 **Biometrics Enrolled!** Opening brand builder...";
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          alert("Biometric enrollment failed: " + verifyData.error);
+        }
+      } catch (err) {
+        console.error("Biometrics enrollment failed:", err);
+        window.location.href = '/'; // Redirect anyway
+      }
+    });
+
+    // ── WebAuthn Biometric Login ──
+    document.getElementById('biometricBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('loginMsg');
+      try {
+        const optRes = await fetch('/api/auth/webauthn/login/options', { method: 'POST' });
+        const options = await optRes.json();
+        
+        if (options.error) {
+          showMsg(msg, options.error, 'error');
+          return;
+        }
+
+        options.challenge = bufferDecode(options.challenge);
+        options.allowCredentials.forEach(cred => {
+          cred.id = bufferDecode(cred.id);
+        });
+
+        const assertion = await navigator.credentials.get({ publicKey: options });
+        
+        const verifyRes = await fetch('/api/auth/webauthn/login/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: assertion.id,
+            response: {
+              clientDataJSON: bufferEncode(assertion.response.clientDataJSON),
+              authenticatorData: bufferEncode(assertion.response.authenticatorData),
+              signature: bufferEncode(assertion.response.signature)
+            }
+          })
+        });
+        
+        const verifyData = await verifyRes.json();
+        if (verifyData.ok) {
+          showMsg(msg, 'Biometric match successful! Opening workspace... ✓', 'success');
+          setTimeout(() => window.location.href = '/', 800);
+        } else {
+          showMsg(msg, "Biometric match failed: " + verifyData.error, 'error');
+        }
+      } catch (err) {
+        console.error("Biometric matching failed:", err);
+        showMsg(msg, "Biometric challenge cancelled or failed.", 'error');
+      }
+    });
+
+    // Check status on load
+    document.addEventListener('DOMContentLoaded', checkAuthStatus);
+  </script>
+</body>
+</html>
